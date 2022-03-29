@@ -1,18 +1,18 @@
-.TH SPT 1 spt\-VERSION
+.TH TOMATO 1 tomato\-VERSION
 .SH NAME
-spt \- simple pomodoro timer
+tomato \- a simple pomodoro timer
 .SH SYNOPSIS
-.B spt
+.B tomato
 .RB [ \-e
 .IR notifyext ]
 .RB [ \-n
 .IR notifycmd ]
 .RB [ \-v ]
 .SH DESCRIPTION
-.B spt
+.B tomato
 is a simple timer that uses pomodoro technique with desktop notification to
 double your efficiency.
-.B spt
+.B tomato
 receives 2 signals:
 .P
 .RS
@@ -48,4 +48,4 @@ Prints version information to stderr, then exits.
 .SH EXAMPLES
 Use system notify_send and play a music without libnotify:
 .IP
-spt -e 'aplay alarm.wav' -n 'notify-send'
+tomato -e 'aplay alarm.wav' -n 'notify-send'

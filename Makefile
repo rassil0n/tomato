@@ -1,15 +1,15 @@
-# spt - simple pomodoro timer
+# tomato - a simple tomato timer
 # See LICENSE file for copyright and license details.
 
 include config.mk
 
-SRC = spt.c
+SRC = tomato.c
 OBJ = ${SRC:.c=.o}
 
-all: options spt
+all: options tomato
 
 options:
-	@echo spt build options:
+	@echo tomato build options:
 	@echo "CFLAGS  = ${CFLAGS}"
 	@echo "LDFLAGS = ${LDFLAGS}"
 	@echo "CC      = ${CC}"
@@ -24,36 +24,41 @@ config.h:
 	@echo creating $@ from config.def.h
 	@cp config.def.h $@
 
-spt: ${OBJ}
+tomato: ${OBJ}
 	@echo CC -o $@
 	@${CC} -o $@ ${OBJ} ${LDFLAGS}
 
 clean:
 	@echo cleaning
-	@rm -f ${SRC:.c=} ${OBJ} spt-${VERSION}.tar.xz
+	@rm -f ${SRC:.c=} ${OBJ} tomato-${VERSION}.tar.xz
 
 dist: clean
 	@echo creating dist tarball
-	@mkdir -p spt-${VERSION}
-	@cp -R LICENSE Makefile README config.mk config.def.h spt.info spt.1 ${SRC} spt-${VERSION}
-	@tar -cf spt-${VERSION}.tar spt-${VERSION}
-	@xz spt-${VERSION}.tar
-	@rm -rf spt-${VERSION}
+	@mkdir -p tomato-${VERSION}
+	@cp -R LICENSE Makefile README config.mk config.def.h tomato.info tomato.1 ${SRC} tomato-${VERSION}
+	@tar -cf tomato-${VERSION}.tar tomato-${VERSION}
+	@xz tomato-${VERSION}.tar
+	@rm -rf tomato-${VERSION}
 
 install: all
 	@echo installing executable file to ${DESTDIR}${PREFIX}/bin
 	@mkdir -p ${DESTDIR}${PREFIX}/bin
-	@cp -f spt ${DESTDIR}${PREFIX}/bin
-	@chmod 755 ${DESTDIR}${PREFIX}/bin/spt
+	@cp -f tomato tomatoc ${DESTDIR}${PREFIX}/bin
+	@chmod 755 ${DESTDIR}${PREFIX}/bin/tomato
+	@chmod 755 ${DESTDIR}${PREFIX}/bin/tomatoc
 	@echo installing manual page to ${DESTDIR}${MANPREFIX}/man1
 	@mkdir -p ${DESTDIR}${MANPREFIX}/man1
-	@sed "s/VERSION/${VERSION}/g" < spt.1 > ${DESTDIR}${MANPREFIX}/man1/spt.1
-	@chmod 644 ${DESTDIR}${MANPREFIX}/man1/spt.1
+	@sed "s/VERSION/${VERSION}/g" < tomato.1 > ${DESTDIR}${MANPREFIX}/man1/tomato.1
+	@sed "s/VERSION/${VERSION}/g" < tomatoc.1 > ${DESTDIR}${MANPREFIX}/man1/tomatoc.1
+	@chmod 644 ${DESTDIR}${MANPREFIX}/man1/tomato.1
+	@chmod 644 ${DESTDIR}${MANPREFIX}/man1/tomatoc.1
 
 uninstall:
 	@echo removing executable file from ${DESTDIR}${PREFIX}/bin
-	@rm -f ${DESTDIR}${PREFIX}/bin/spt
+	@rm -f ${DESTDIR}${PREFIX}/bin/tomato
+	@rm -f ${DESTDIR}${PREFIX}/bin/tomatoc
 	@echo removing manual page from ${DESTDIR}${MANPREFIX}/man1
-	@rm -f ${DESTDIR}${MANPREFIX}/man1/spt.1
+	@rm -f ${DESTDIR}${MANPREFIX}/man1/tomato.1
+	@rm -f ${DESTDIR}${MANPREFIX}/man1/tomatoc.1
 
 .PHONY: all options clean dist install uninstall

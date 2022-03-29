@@ -1,0 +1,23 @@
+#!/bin/sh
+
+PID=$(pgrep -x tomato)
+
+[ -z $PID ] && exit
+
+case "$1" in
+	s|-s|--start)
+		[ -z $PID ] && echo start ;;
+
+	d|-d|--display)
+		kill -s USR1 $PID ;;
+
+	t|-t|--toggle)
+		kill -s USR2 $PID ;;
+
+	k|-k|--kill)
+		kill $PID &
+		notify-send -i "~/.local/icons/stop.png" "TOMATO" "Session ended" ;;
+
+	*)
+		echo "Usage: $(basename $0) [-s] [-d] [-t] [-k]";;
+esac

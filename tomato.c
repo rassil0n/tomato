@@ -21,6 +21,7 @@ char *argv0;
 typedef struct {
 	unsigned int tmr;
 	char *cmt;
+	char *icon;
 } Timers;
 
 #include "config.h"
@@ -30,7 +31,7 @@ volatile static sig_atomic_t display, suspend;
 /* function declarations */
 static void die(const char *errstr, ...);
 static void spawn(char *argv[]);
-static void notify_send(char *cmt);
+static void notify_send(char *cmt, char *icon);
 static void display_state(int remaining, int suspend);
 static void toggle_display(int sigint);
 static void toggle_suspend(int sigint);
@@ -54,22 +55,21 @@ spawn(char *argv[])
 	if (fork() == 0) {
 		setsid();
 		execvp(argv[0], argv);
-		die("spt: execvp %s\n", argv[0]);
+		die("tomato: execvp %s\n", argv[0]);
 		perror(" failed");
 		exit(0);
 	}
 }
 
 void
-notify_send(char *cmt)
+notify_send(char *cmt, char *icon)
 {
 	if (strcmp(notifycmd, ""))
-		spawn((char *[]) { notifycmd, "spt", cmt, NULL });
+		spawn((char *[]) { notifycmd, "TOMATO", cmt, NULL });
 #ifdef NOTIFY
 	else {
-		notify_init("spt");
-		NotifyNotification *n = notify_notification_new("spt", cmt, \
-					"dialog-information");
+		notify_init("TOMATO");
+		NotifyNotification *n = notify_notification_new("TOMATO", cmt, icon);
 		notify_notification_show(n, NULL);
 		g_object_unref(G_OBJECT(n));
 		notify_uninit();
@@ -85,12 +85,9 @@ display_state(int remaining, int suspend)
 {
 	char buf[29];
 
-	snprintf(buf, 29, "Remaining: %02d:%02d %s",
-		 remaining / 60,
-		 remaining % 60,
-		 (suspend) ? "◼" : "▶");
+	snprintf(buf, 29, "Remaining: %02d:%02d", remaining / 60, remaining % 60);
 
-	notify_send(buf);
+	(suspend) ? notify_send(buf,PAUSEICON) : notify_send(buf,PLAYICON);
 	display = 0;
 }
 
@@ -98,12 +95,15 @@ void
 toggle_display(int sigint)
 {
 	display = 1;
+	spawn((char *[]) { "/bin/sh", "-c", NOTIFYSOUNDCMD, NULL });
 }
 
 void
 toggle_suspend(int sigint)
 {
 	suspend ^= 1;
+	spawn((char *[]) { "/bin/sh", "-c", NOTIFYSOUNDCMD, NULL });
+	(suspend) ? notify_send("Timer paused",TIMERPAUSEICON): notify_send("Timer resumed", TIMERRESUMEICON);
 }
 
 void
@@ -128,7 +128,7 @@ main(int argc, char *argv[])
 			notifycmd = EARGF(usage());
 			break;
 		case 'v':
-			die("spt " VERSION " © 2015-2020 spt engineers, "
+			die("tomato " VERSION " © 2022 rassil0n, "
 			    "see LICENSE for details\n");
 		default:
 			usage();
@@ -153,7 +153,8 @@ main(int argc, char *argv[])
 	sigemptyset(&emptymask);
 
 	for (i = 0; ; i = (i + 1) % LEN(timers)) {
-		notify_send(timers[i].cmt);
+		notify_send(timers[i].cmt,timers[i].icon);
+		spawn((char *[]) { "/bin/sh", "-c",TIMERSOUNDCMD, NULL });
 		remaining.tv_sec = timers[i].tmr;
 		remaining.tv_nsec = 0;
 		while (remaining.tv_sec) {
